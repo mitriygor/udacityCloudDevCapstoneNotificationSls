@@ -4,6 +4,7 @@ service:
 plugins:
   - serverless-bundle
   - serverless-pseudo-parameters
+  - serverless-iam-roles-per-function
 
 provider:
   name: aws
@@ -13,8 +14,7 @@ provider:
   environment:
     SOURCE_EMAIL: mitry.g@gmail.com
   stage: ${opt:stage, 'dev'}
-  iamRoleStatements:
-    - ${file(iam/SendMailIAM.yml):SendMailIAM}
+
 
 resources:
   Resources:
@@ -26,6 +26,9 @@ resources:
 functions:
   sendMail:
     handler: src/handlers/sendMail.handler
+    iamRoleStatementsName: SendMailIAM
+    iamRoleStatements:
+      - ${file(iam/SendMailIAM.yml):SendMailIAM}
     events:
       - sqs:
           arn: ${self:custom.mailQueue.arn}
